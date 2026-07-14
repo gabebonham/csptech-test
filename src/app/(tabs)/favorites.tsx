@@ -1,14 +1,16 @@
 import { ProductCard } from '@/features/products/components/ProductCard';
 import { useFavorites } from '@/features/products/hooks/useFavorites';
 import { useProducts } from '@/features/products/hooks/useProducts';
+import { useTheme } from '@/hooks/use-theme';
 import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 
 export default function FavoritesScreen() {
-    const { data: products, isLoading } = useProducts();
+    const { data: products, isLoading, isError, isRefreshing, refetch } = useProducts();
     const { favoriteIds, toggleFavorite } = useFavorites();
     const router = useRouter();
+    const colorScheme = useTheme()
 
     const favoriteProducts = useMemo(
         () => products?.filter((p) => favoriteIds.includes(p.id)) ?? [],
@@ -23,6 +25,16 @@ export default function FavoritesScreen() {
         );
     }
 
+    if (isError && !products) {
+        return (
+            <View style={styles.center}>
+                <Text style={styles.errorText}>Não foi possível carregar os produtos.</Text>
+                <Pressable onPress={refetch} style={[styles.retryButton, {backgroundColor:colorScheme.tint}]}>
+                    <Text style={styles.retryButtonText}>Tentar novamente</Text>
+                </Pressable>
+            </View>
+        );
+    }
     return (
         <View style={styles.mainContainer}>
             <Text style={styles.title}>Favoritos</Text>
@@ -53,4 +65,16 @@ const styles = StyleSheet.create({
     list: { gap: 16 },
     center: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 60 },
     title: { fontSize: 24, fontWeight: 'bold' },
+    retryButton: {
+        marginTop: 12,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        backgroundColor: '#222',
+        borderRadius: 8,
+    },
+    retryButtonText: {
+        color: '#fff',
+        fontWeight: '600',
+    },
+    errorText: { fontSize: 16 },
 });

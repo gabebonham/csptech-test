@@ -37,7 +37,8 @@ export function ProductCard(
                 <Text style={styles.ratingText}>
                     {product.rating.rate.toFixed(1)} ({product.rating.count})
                 </Text>
-            </View><Text style={styles.price}>
+            </View>
+            <Text style={styles.price}>
                 {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
             </Text>
         </View>

@@ -3,15 +3,16 @@ import { ProductCard } from '@/features/products/components/ProductCard';
 import { SearchBar } from '@/features/products/components/SearchBar';
 import { useFavorites } from '@/features/products/hooks/useFavorites';
 import { useProducts } from '@/features/products/hooks/useProducts';
+import { useTheme } from '@/hooks/use-theme';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 
 export default function ProductListScreen() {
     const { data: products, isLoading, isError, refetch, isRefreshing } = useProducts();
     const { favoriteIds, toggleFavorite } = useFavorites();
     const [searchQuery, setSearchQuery] = useState('');
-
+    const colorScheme = useTheme()
     const router = useRouter();
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const handleRefresh = async () => {
@@ -35,7 +36,7 @@ export default function ProductListScreen() {
         return result;
     }, [products, searchQuery, selectedCategory]);
 
-    if (isLoading) {
+    if (isLoading || isRefreshing) {
         return (
             <View style={styles.center}>
                 <ActivityIndicator size="large" />
@@ -43,7 +44,16 @@ export default function ProductListScreen() {
         );
     }
 
-
+    if (isError && !products) {
+        return (
+            <View style={styles.center}>
+                <Text style={styles.errorText}>Não foi possível carregar os produtos.</Text>
+                <Pressable onPress={refetch} style={[styles.retryButton, {backgroundColor:colorScheme.tint}]}>
+                    <Text style={styles.retryButtonText}>Tentar novamente</Text>
+                </Pressable>
+            </View>
+        );
+    }
     return (
         <View style={styles.mainContainer}>
             <Text style={styles.title}>Produtos</Text>
@@ -94,4 +104,14 @@ const styles = StyleSheet.create({
     center: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 60 },
     errorText: { fontSize: 16 },
     title: { fontSize: 24, fontWeight: 'bold', },
+    retryButton: {
+        marginTop: 12,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+    },
+    retryButtonText: {
+        color: '#fff',
+        fontWeight: '600',
+    },
 });

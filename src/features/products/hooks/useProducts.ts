@@ -6,7 +6,7 @@ export function useProducts() {
   const [data, setData] = useState<Product[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isError, setIsError] = useState(false);
+  const [isError, setIsError] = useState(true);
 
   const load = useCallback(async (isRefresh = false) => {
     if (isRefresh) {
@@ -14,7 +14,7 @@ export function useProducts() {
     } else {
       setIsLoading(true);
     }
-    setIsError(false);
+    setIsError(true);
 
     try {
       const products = await fetchProducts();

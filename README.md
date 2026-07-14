@@ -1,56 +1,54 @@
-# Welcome to your Expo app 👋
+# App de Produtos
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplicativo mobile de listagem, busca, filtro por categoria e favoritos de produtos, construído com Expo + React Native.
 
-## Get started
+## Instruções para execução
 
-1. Install dependencies
+### Pré-requisitos
+- Node.js 18+
+- npm
+- Expo Go instalado no celular (ou emulador Android/iOS configurado)
 
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
+### Passos
 ```bash
-npm run reset-project
+# instalar dependências
+npm install
+
+# iniciar o projeto
+npx expo start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Após o `expo start`, escaneie o QR code com o app **Expo Go** (Android) ou pela **Câmera** (iOS), ou pressione `a`/`i` no terminal para abrir em emulador Android/simulador iOS.
 
-### Other setup steps
+## Tecnologias utilizadas
+ 
+- **React Native** — base do app
+- **Expo** — ferramentas de desenvolvimento, build e execução do projeto
+- **TypeScript** — tipagem estática
+- **React Navigation** — navegação entre telas (stack para detalhe do produto, tabs para produtos / favoritos)
+- **Axios** — cliente HTTP para consumo da API de produtos
+- **AsyncStorage** — persistência local (favoritos)
+- **lucide-react-native** — ícones (coração de favorito, estrela de avaliação, seta de voltar, etc.)
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+## Decisões técnicas adotadas
 
-## Learn more
+- **Estrutura por feature** (`features/products/...`): componentes, hooks e tipos relacionados a produtos ficam agrupados juntos, facilitando manutenção e localização de código.
+- **Filtros combinados no client**: busca por texto e filtro por categoria são aplicados com `useMemo` sobre os dados já carregados, evitando requisições extras a cada tecla digitada.
+- **Feedback de erro**:
+  - **Tela de erro dedicada com botão de retry**, para falhas no carregamento inicial, quando não há dados para exibir.
+- **Componentização de UI reutilizável**: `ProductCard`, `SearchBar` e `CategoriesComponent` são independentes da tela que os usa, recebendo estado e callbacks via props (estado do filtro/busca vive na tela, não nos componentes).
 
-To learn more about developing your project with Expo, look at the following resources:
+## Limitações conhecidas
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+- Sem persistência local: favoritos e filtros são perdidos ao fechar o app (não há uso de `AsyncStorage` ou similar).
+- Sem testes automatizados (unitários ou E2E).
+- Filtro por categoria e busca por texto operam sobre a lista já carregada em memória, não há paginação nem busca server-side — pode não escalar bem para catálogos muito grandes.
+- Sem tratamento de estado offline persistente (o app não detecta ausência de conexão previamente, apenas reage ao erro da requisição).
 
-## Join the community
+## Performance e boas práticas
 
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- **`useMemo`** na filtragem de produtos, evitando recomputar a lista filtrada em renders que não alteram busca, categoria ou dados.
+- **`FlatList`** para listagem e para categorias (ao invés de `ScrollView` com `.map`), garantindo renderização virtualizada e uso de memória controlado em listas potencialmente grandes.
+- **Retry controlado em falhas de rede**, evitando que uma falha momentânea interrompa a experiência do usuário sem alternativa de recuperação.
+- **Componentes de apresentação simples**, sem lógica de fetch embutida (`ProductCard`, `CategoriesComponent`), favorecendo reuso e testabilidade.
+- **Tipagem explícita (`Product`, props de componentes)**, reduzindo erros em tempo de desenvolvimento e facilitando refino futuro do modelo de dados.
