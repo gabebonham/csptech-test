@@ -1,5 +1,5 @@
 import { useTheme } from '@/hooks/use-theme';
-import { Heart } from 'lucide-react-native';
+import { Heart, Star } from 'lucide-react-native';
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { Product } from "../types/ProductType";
 
@@ -32,7 +32,12 @@ export function ProductCard(
                     />
                 </Pressable></View>
             <Text style={[styles.category, { backgroundColor: colorScheme.tintSecondary, color: colorScheme.background, }]}>{product.category}</Text>
-            <Text style={styles.price}>
+            <View style={styles.ratingRow}>
+                <Star size={12} color="#f5a623" fill="#f5a623" />
+                <Text style={styles.ratingText}>
+                    {product.rating.rate.toFixed(1)} ({product.rating.count})
+                </Text>
+            </View><Text style={styles.price}>
                 {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
             </Text>
         </View>
@@ -74,7 +79,7 @@ const styles = StyleSheet.create({
     info: {
         padding: 8,
         flex: 1,
-        height:'100%'
+        height: '100%'
     },
     name: {
         fontSize: 13,
@@ -102,5 +107,15 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         alignSelf: 'flex-start',
         marginTop: 2,
+    },
+    ratingRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        marginTop: 4,
+    },
+    ratingText: {
+        fontSize: 11,
+        color: '#666',
     },
 });

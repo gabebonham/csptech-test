@@ -1,8 +1,8 @@
+import { CategoriesComponent } from '@/features/products/components/CategoriesComponent';
 import { ProductCard } from '@/features/products/components/ProductCard';
 import { SearchBar } from '@/features/products/components/SearchBar';
 import { useFavorites } from '@/features/products/hooks/useFavorites';
 import { useProducts } from '@/features/products/hooks/useProducts';
-import { useTheme } from '@/hooks/use-theme';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
@@ -13,16 +13,28 @@ export default function ProductListScreen() {
     const [searchQuery, setSearchQuery] = useState('');
 
     const router = useRouter();
-    const colorScheme = useTheme()
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+    const handleRefresh = async () => {
+        setSearchQuery('');
+        setSelectedCategory(null);
+        await refetch();
+    };
     const filteredProducts = useMemo(() => {
         if (!products) return [];
-        if (!searchQuery.trim()) return products;
+        let result = products;
 
-        const query = searchQuery.toLowerCase();
-        return products.filter((product) =>
-            product.title.toLowerCase().includes(query)
-        );
-    }, [products, searchQuery]);
+        if (selectedCategory) {
+            result = result.filter((p) => p.category === selectedCategory);
+        }
+
+        if (searchQuery.trim()) {
+            const query = searchQuery.toLowerCase();
+            result = result.filter((p) => p.title.toLowerCase().includes(query));
+        }
+
+        return result;
+    }, [products, searchQuery, selectedCategory]);
+
     if (isLoading) {
         return (
             <View style={styles.center}>
@@ -36,6 +48,7 @@ export default function ProductListScreen() {
         <View style={styles.mainContainer}>
             <Text style={styles.title}>Produtos</Text>
             <SearchBar value={searchQuery} onChangeText={setSearchQuery} placeholder="Buscar produtos..." />
+            <CategoriesComponent selectedCategory={selectedCategory} onSelectCategory={setSelectedCategory} />
 
             <FlatList
                 data={filteredProducts}
@@ -43,7 +56,7 @@ export default function ProductListScreen() {
                 keyExtractor={(item) => item.id.toString()}
                 numColumns={1}
                 contentContainerStyle={styles.list}
-                onRefresh={refetch}
+                onRefresh={handleRefresh}
                 refreshing={isRefreshing}
                 renderItem={({ item }) => (
                     <ProductCard
@@ -64,7 +77,7 @@ export default function ProductListScreen() {
 }
 
 const styles = StyleSheet.create({
-    mainContainer: { flex: 1, padding: 20, gap: 16 },
+    mainContainer: { flex: 1, paddingHorizontal: 20, paddingTop: 56, gap: 16 },
     searchBar: {
         borderRadius: 16,
         paddingVertical: 6,
